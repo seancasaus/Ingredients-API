@@ -24,18 +24,42 @@ var ingredients = [
     }
 ];
 
-app.get('/', function(req,res) {
+//gets the ingredients 
+app.get('/ingredients', function(req,res) {
     res.send(ingredients); //json response
 });
 
-app.post('/', function(req,res) {
+//adds an ingredient
+app.post('/ingredients', function(req,res) {
     var ingredient = req.body;
-    if (!ingredient || ingredient.text == "") {
+    if (!ingredient || ingredient.text === "") {
         res.status(500).send({error: "Your ingredient must have text"});
     }
     else {
         ingredients.push(ingredient);
         res.status(200).send(ingredients);
+    }
+});
+
+//replace ingredient with diffeent item
+app.put('/ingredients/:ingredientId', function(req,res) {
+    var ingredientId = req.params.ingredientId;
+    var newText = req.body.text;
+    console.log(req.body.text);
+
+    if(!newText || newText === "") {
+        res.status(500).send({error: "Must Provide Ingredient Text"});
+    }
+    else {
+        for (var x = 0; x < ingredients.length; x++) {
+            var temp = ingredients[x];
+
+            if (temp.id === ingredientId) {
+                ingredients[x].text = newText; 
+                break;
+            }
+        }
+        res.send(ingredients);
     }
 });
 
