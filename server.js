@@ -32,33 +32,79 @@ app.get('/ingredients', function(req,res) {
 //adds an ingredient
 app.post('/ingredients', function(req,res) {
     var ingredient = req.body;
-    if (!ingredient || ingredient.text === "") {
-        res.status(500).send({error: "Your ingredient must have text"});
+
+    if (!ingredient || ingredient.text === "" || ingredient.id === "" || !ingredient.text || !ingredient.id) {
+        res.status(500).send({error: "Your ingredient must have text and id"});
     }
     else {
+        for (var x = 0; x < ingredients.length; x++) {
+            var temp = ingredients[x];
+            if(temp.id === ingredient.id) {
+                res.status(500).send({error: "Ingredient already exist, please input new id"});
+            }
+        }
         ingredients.push(ingredient);
         res.status(200).send(ingredients);
     }
 });
 
-//replace ingredient with diffeent item
+//replace ingredient with different item
 app.put('/ingredients/:ingredientId', function(req,res) {
     var ingredientId = req.params.ingredientId;
     var newText = req.body.text;
-    console.log(req.body.text);
 
     if(!newText || newText === "") {
         res.status(500).send({error: "Must Provide Ingredient Text"});
     }
     else {
+        var objectfound = false;
         for (var x = 0; x < ingredients.length; x++) {
             var temp = ingredients[x];
+            objectfound = true;
 
             if (temp.id === ingredientId) {
                 ingredients[x].text = newText; 
                 break;
             }
+            else {
+                objectfound = false;
+            }
         }
+        if (objectfound === false) {
+            res.status(500).send({error:"Ingredient id not found"});
+        }
+        else {
+            res.send(ingredients);
+        }
+    }
+});
+
+//if id is not provided, error is thrown
+app.delete('/ingredients/', function(req,res) {
+    res.status(500).send({error: "Must Provide Ingredient id in url"});
+});
+
+//if id is provided, checks if valid, deletes if id is valid
+app.delete('/ingredients/:ingredientId', function(req,res) {
+    var ingredientId = req.params.ingredientId;
+
+    var objectfound = false;
+    for (var x = 0; x < ingredients.length; x++) {
+        var temp = ingredients[x];
+        objectfound = true;
+
+        if (temp.id === ingredientId) {
+            ingredients.pop(temp);
+            break;
+        }
+        else {
+            objectfound = false;
+        }
+    }
+    if (objectfound === false) {
+        res.status(500).send({error:"Ingredient id not found"});
+    }
+    else {
         res.send(ingredients);
     }
 });
